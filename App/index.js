@@ -3,6 +3,7 @@ import { SafeAreaView, StatusBar, StyleSheet, Text, View } from "react-native";
 
 import Row from "./components/Row";
 import Button from "./components/Button";
+import calculator, { initialState } from "./util/calculator";
 
 const styles = StyleSheet.create({
   container: {
@@ -18,69 +19,12 @@ const styles = StyleSheet.create({
     textAlign: "right"
   }
 });
+
 export default class App extends React.Component {
-  state = {
-    currentValue: "0",
-    operator: null,
-    previousValue: null
-  };
+  state = initialState;
 
   handleTap = (type, value) => {
-    this.setState(state => {
-      if (type === "number") {
-        if (state.currentValue === "0") {
-          return { currentValue: `${value}` };
-        }
-        return { currentValue: `${state.currentValue}${value}` };
-      }
-
-      if (type === "operator") {
-        return {
-          currentValue: "0",
-          operator: value,
-          previousValue: state.currentValue
-        };
-      }
-
-      if (type === "equal") {
-        const { currentValue, previousValue, operator } = state;
-
-        const current = parseFloat(currentValue);
-        const previous = parseFloat(previousValue);
-        const resetState = {
-          operator: null,
-          previousValue: null
-        };
-        if (operator === "/") {
-          return {
-            currentValue: previous / current,
-            ...resetState
-          };
-        }
-
-        if (operator === "*") {
-          return {
-            currentValue: previous * current,
-            ...resetState
-          };
-        }
-
-        if (operator === "+") {
-          return {
-            currentValue: previous + current,
-            ...resetState
-          };
-        }
-
-        if (operator === "-") {
-          return {
-            currentValue: previous - current,
-            ...resetState
-          };
-        }
-      }
-      return state;
-    });
+    this.setState(state => calculator(type, value, state));
   };
 
   render() {
@@ -92,13 +36,21 @@ export default class App extends React.Component {
             {parseFloat(this.state.currentValue).toLocaleString()}
           </Text>
           <Row>
-            <Button text="C" theme="secondary" onPress={() => alert("todo")} />
+            <Button
+              text="C"
+              theme="secondary"
+              onPress={() => this.handleTap("clear")}
+            />
             <Button
               text="+/-"
               theme="secondary"
-              onPress={() => alert("todo")}
+              onPress={() => this.handleTap("posneg")}
             />
-            <Button text="%" theme="secondary" onPress={() => alert("todo")} />
+            <Button
+              text="%"
+              theme="secondary"
+              onPress={() => this.handleTap("percentage")}
+            />
             <Button
               text="/"
               theme="secondary"
@@ -108,7 +60,7 @@ export default class App extends React.Component {
           <Row>
             <Button text="7" onPress={() => this.handleTap("number", 7)} />
             <Button text="8" onPress={() => this.handleTap("number", 8)} />
-            <Button text="9" onPress={(() => this.handleTap("number"), 9)} />
+            <Button text="9" onPress={() => this.handleTap("number", 9)} />
             <Button
               text="*"
               theme="accent"
