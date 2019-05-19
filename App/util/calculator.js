@@ -4,74 +4,84 @@ export const initialState = {
   previousValue: null
 };
 
-const calculator = (type, value, state) => {
-  if (type === "number") {
-    if (state.currentValue === "0") {
-      return { currentValue: `${value}` };
-    }
-    return { currentValue: `${state.currentValue}${value}` };
+export const handleNumber = (value, state) => {
+  if (state.currentValue === "0") {
+    return { currentValue: `${value}` };
   }
+  return { currentValue: `${state.currentValue}${value}` };
+};
 
-  if (type === "operator") {
+export const handleEqual = state => {
+  const { currentValue, previousValue, operator } = state;
+
+  const current = parseFloat(currentValue);
+  const previous = parseFloat(previousValue);
+  const resetState = {
+    operator: null,
+    previousValue: null
+  };
+  if (operator === "/") {
     return {
-      currentValue: "0",
-      operator: value,
-      previousValue: state.currentValue
+      currentValue: previous / current,
+      ...resetState
     };
   }
 
-  if (type === "equal") {
-    const { currentValue, previousValue, operator } = state;
-
-    const current = parseFloat(currentValue);
-    const previous = parseFloat(previousValue);
-    const resetState = {
-      operator: null,
-      previousValue: null
-    };
-    if (operator === "/") {
-      return {
-        currentValue: previous / current,
-        ...resetState
-      };
-    }
-
-    if (operator === "*") {
-      return {
-        currentValue: previous * current,
-        ...resetState
-      };
-    }
-
-    if (operator === "+") {
-      return {
-        currentValue: previous + current,
-        ...resetState
-      };
-    }
-
-    if (operator === "-") {
-      return {
-        currentValue: previous - current,
-        ...resetState
-      };
-    }
-  }
-
-  if (type === "clear") {
-    return initialState;
-  }
-  if (type === "posneg") {
+  if (operator === "*") {
     return {
-      currentValue: `${parseFloat(state.currentValue) * -1}`
+      currentValue: previous * current,
+      ...resetState
     };
   }
-  if (type === "percentage") {
+
+  if (operator === "+") {
     return {
-      currentValue: `${parseFloat(state.currentValue) * 0.01}`
+      currentValue: previous + current,
+      ...resetState
+    };
+  }
+
+  if (operator === "-") {
+    return {
+      currentValue: previous - current,
+      ...resetState
     };
   }
   return state;
+};
+
+const calculator = (type, value, state) => {
+  switch (type) {
+    case "number": {
+      return handleNumber(value, state);
+    }
+    case "operator": {
+      return {
+        currentValue: "0",
+        operator: value,
+        previousValue: state.currentValue
+      };
+    }
+    case "equal": {
+      return handleEqual(state);
+    }
+    case "clear": {
+      return initialState;
+    }
+    case "posneg": {
+      return {
+        currentValue: `${parseFloat(state.currentValue) * -1}`
+      };
+    }
+    case "percentage": {
+      return {
+        currentValue: `${parseFloat(state.currentValue) * 0.01}`
+      };
+    }
+    default: {
+      return state;
+    }
+  }
 };
 
 export default calculator;
